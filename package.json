@@ -1,0 +1,69 @@
+{
+  "name": "backend-node-arkusnexus",
+  "version": "0.0.0",
+  "author": "Carlos Silvestri>",
+  "license": "MIT",
+  "scripts": {
+    "prestart": "",
+    "start": "cross-env NODE_ENV=production node ./api/api.js",
+    "poststart": "",
+    "dev": "cross-env NODE_ENV=development node ./api/api.js",
+    "nodemon": "nodemon --exec npm run dev",
+    "create-sqlite-db": "shx touch ./db/database.sqlite",
+    "drop-sqlite-db": "shx rm ./db/database.sqlite",
+    "lint": "eslint ./api/. ./config/. ./test/.",
+    "pretest": "npm run lint",
+    "production": "cross-env NODE_ENV=production node ./api/api.js",
+    "test": "npm run create-sqlite-db; cross-env NODE_ENV=testing jest --coverage; npm run drop-sqlite-db",
+    "test-ci": "jest --coverage --forceExit",
+    "desarrollo": "concurrently \"npm run nodemon \" \"npm run watch\" ",
+    "watch": "webpack --w --mode development"
+  },
+  "jest": {
+    "globals": {
+      "__DEV__": true
+    },
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "/node_modules/"
+    ]
+  },
+  "dependencies": {
+    "bcrypt-nodejs": "^0.0.3",
+    "body-parser": "^1.18.2",
+    "concurrently": "^6.0.0",
+    "core-js": "^2.6.9",
+    "cors": "^2.8.4",
+    "dotenv": "^8.2.0",
+    "express": "^4.16.3",
+    "express-fileupload": "^1.2.1",
+    "express-routes-mapper": "^1.0.2",
+    "express-validator": "^6.10.0",
+    "fs": "0.0.1-security",
+    "helmet": "^3.12.0",
+    "html-to-text": "^5.1.1",
+    "https": "^1.0.0",
+    "jsonwebtoken": "^8.2.1",
+    "juice": "^8.0.0",
+    "mysql2": "^2.2.5",
+    "nodemailer": "^6.6.2",
+    "nodemailer-plugin-inline-base64": "^2.1.1",
+    "path": "^0.12.7",
+    "sequelize": "^6.0.0",
+    "swagger-jsdoc": "^4.0.0",
+    "swagger-ui-express": "^4.1.4",
+    "util": "^0.12.4",
+    "webpack": "^5.24.2"
+  },
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.11.0",
+    "husky": "^0.14.3",
+    "jest": "^24.8.0",
+    "nodemon": "^1.17.3",
+    "sequelize-cli": "^6.2.0",
+    "shx": "^0.2.2",
+    "supertest": "^3.0.0"
+  }
+}
