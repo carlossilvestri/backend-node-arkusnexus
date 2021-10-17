@@ -9,7 +9,6 @@
     <li>
         <ul>
             <li>Archivo variables.env con las siguientes variables en la raíz del proyecto (al mismo nivel de la carpeta api)</li>
-            <h5>Una base de datos MySQL llamada medifree</h5>
             <li>DB_NAME=YOUR_DB_NAME</li>
             <li>DB_USER=root</li>
             <li>DB_PASS=</li>

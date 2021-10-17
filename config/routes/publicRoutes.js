@@ -20,9 +20,9 @@ const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Medifree API",
+      title: "Administracion ArkusNexus API",
       version: "1.0.0",
-      description: "Medifree Api for managing donations of medicines",
+      description: "Administracion ArkusNexus Api for code challenge 2",
       contact: {
         name: "Carlos Silvestri"
       },
@@ -37,10 +37,22 @@ module.exports = () => {
   router.get("/users", UserController.getUsers);
   /* LEVELS */
   router.post("/level", LevelController.register);
+  router.get("/level", LevelController.getAll);
+  router.get("/level/:id_level", LevelController.getById);
+  router.put("/level/:id_level", LevelController.edit);
+  router.delete("/level/:id_level", LevelController.delete);
   /* ROLES */
   router.post("/role", RoleController.register);
+  router.get("/role", RoleController.getAll);
+  router.get("/role/:id_role", RoleController.getById);
+  router.put("/role/:id_role", RoleController.edit);
+  router.delete("/role/:id_role", RoleController.delete);
   /* TEAMS */
   router.post("/team", TeamController.register);
+  router.get("/team", TeamController.getTeams);
+  router.get("/team/:id_team", TeamController.getById);
+  router.put("/team/:id_team", TeamController.edit);
+  router.delete("/team/:id_team", TeamController.delete);
   /* ACCOUNTS */
   router.post("/account", AccountController.register);
   /* TEAM_USERS */
