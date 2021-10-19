@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { isSuperAdmin } = require("../functions/function");
 require("dotenv").config({
   path: "variables.env",
 });
@@ -46,6 +47,21 @@ exports.verificarTokenDesdeQuery = (req, res, next) => {
     req.user = decoded.user;
     next();
   });
+};
+/*
+===========================
+Check if the user of the token of req.user is 'SUPER_ADMIN'
+==========================
+*/
+exports.checkForSuperAdmin = (req, res, next) => {
+    if (isSuperAdmin(req.user)) {
+      next();
+    }
+    return res.status(401).json({
+      ok: false,
+      mensaje: "Token incorrecto",
+      errors: err,
+    });
 };
 /*
 ===========================

@@ -34,7 +34,11 @@ module.exports = () => {
   /* SWAGGER */
   router.use('/api-docs-one', swaggerUI.serveFiles(swaggerDocumentOne, swaggerOptions), swaggerUI.setup(swaggerDocumentOne));
   /* USERS */
-  router.get("/users", UserController.getUsers);
+  router.post("/user", UserController.register);
+  router.get("/users", UserController.getAll);
+  router.get("/user/:id_user", UserController.getUserById);
+  router.put("/user/:id_user", auth, UserController.editUserById);
+  router.post("/login", UserController.login);
   /* LEVELS */
   router.post("/level", LevelController.register);
   router.get("/level", LevelController.getAll);
@@ -55,8 +59,16 @@ module.exports = () => {
   router.delete("/team/:id_team", TeamController.delete);
   /* ACCOUNTS */
   router.post("/account", AccountController.register);
+  router.get("/account", AccountController.getAll);
+  router.get("/account/:id_account", AccountController.getById);
+  router.put("/account/:id_account", AccountController.editById);
   /* TEAM_USERS */
   router.post("/team_user", Team_userController.register);
+  router.put("/team_user/:id_team_user", Team_userController.editById);
+  router.delete("/team_user/:id_team_user", Team_userController.delete);
+  router.get("/team_user", Team_userController.getAll);
+  router.get("/team_user_by_team_f/:id_team_f", Team_userController.getByTeamF);
+  router.get("/team_user_by_user_f/:id_user_f", Team_userController.getByUserF);
   // 
   // router.get("/users", UserController.getUsers);
   /* PRUEBAS */
