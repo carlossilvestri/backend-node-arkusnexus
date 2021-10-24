@@ -54,13 +54,15 @@ Check if the user of the token of req.user is 'SUPER_ADMIN'
 ==========================
 */
 exports.checkForSuperAdmin = (req, res, next) => {
+  console.log("isSuperAdmin ", isSuperAdmin(req.user));
+  console.log("req.user ", req.user);
     if (isSuperAdmin(req.user)) {
       next();
+      return;
     }
     return res.status(401).json({
       ok: false,
-      mensaje: "Token incorrecto",
-      errors: err,
+      mensaje: "Token incorrecto"
     });
 };
 /*

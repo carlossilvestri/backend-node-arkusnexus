@@ -6,6 +6,7 @@ const Level = require("../models/Level");
 const authService = require("../services/auth.service");
 const bcryptService = require("../services/bcrypt.service");
 const { lePerteneceElToken } = require("../functions/function");
+const { Op } = require("sequelize");
 
 /*
 ==========================================
@@ -60,7 +61,61 @@ exports.getAll = async (req, res) => {
     });
   }
 };
+/*
+==========================================
+Get Users by name: GET - /users-by-name Params: ?desde=0 (Devuelve un arreglo de Users limitandolo a 10 y decidiendo desde para la paginacion) sino se envia un desde por default sera 0.
+ Los mas recientes primero. (Order by DESC) 
+==========================================
+*/
+exports.getUsersByName = async (req, res) => {
+  let desde = req.query.desde || 0, name = req.query.name || '';
+  desde = Number(desde);
 
+  if (desde == 0 || desde > 0) {
+    try {
+      let users = await User.findAll({
+        limit: 10,
+        offset: desde,
+        order: [["createdAt", "DESC"]],
+        where: {
+          name: {
+            [Op.like]: "%" + name + "%",
+          }
+        },
+        include: [
+          {
+            model: Role,
+            as: "Role",
+            required: true
+          },
+          {
+            model: Level,
+            as: "Level",
+            required: true
+          },
+        ],
+      });
+      const UsersQuantity = users.length;
+      return res.status(200).json({
+        ok: true,
+        users_quantity_for_the_request: UsersQuantity,
+        users,
+      });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({
+        ok: false,
+        msg: "Internal server error",
+      });
+    }
+  } else {
+    // 400 (Bad Request)
+    return res.status(400).json({
+      ok: false,
+      msg: "El parametro desde no es válido",
+    });
+  }
+};
 /*
 ==========================================
             Get a specific user by id.
@@ -154,9 +209,136 @@ exports.editUserById = async (req, res) => {
     user.is_active_user = is_active_user;
     user.role = role;
     user.name = name;
+    if(password && password != ''){
+      user.password = password;
+      user.password = bcryptService().password(user);
+    }
+    // console.log('bcryptService().password(user); ', bcryptService().password(user));
+    user.updatedAt = new Date();
+    //Metodo save de sequelize para guardar en la BDD
+    const resultado = await user.save();
+    if (!resultado) {
+      return res.status(400).json({
+        ok: false,
+        msg: "There was an error, trying to save the user.",
+        user,
+      });
+    }
+    user = await User.findByPk(id_user, {
+      include: [
+        {
+          model: Role,
+          as: "Role",
+          required: true
+        },
+        {
+          model: Level,
+          as: "Level",
+          required: true
+        },
+      ],
+    });
+    return res.status(200).json({
+      ok: true,
+      msg: "User was updated",
+      user
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      ok: false,
+      msg: "Internal server error",
+    });
+  }
+};
+/*
+==========================================
+                  Edit a user: 
+PUT - /user/:id_user Body: (x-www-form-urlencoded)
+
+id_english_level_f
+id_role_f
+technical_knoledge
+link_cv
+is_active_user
+role
+password
+email
+name
+==========================================
+*/
+exports.editUserByIdSuperAdmin = async (req, res) => {
+  // Debugging
+  const id_user = Number(req.params.id_user);
+  // Get the data by a destructuring.
+  const { id_english_level_f, id_role_f, technical_knoledge, link_cv, is_active_user, role,password, email, name } = req.body;
+  try {
+    let user = await User.findByPk(id_user);
+    // Update data:
+    user.id_english_level_f = id_english_level_f;
+    user.id_role_f = id_role_f;
+    user.technical_knoledge = technical_knoledge;
+    user.link_cv = link_cv;
+    user.is_active_user = is_active_user;
+    user.role = role;
+    user.name = name;
     user.password = password;
     user.password = bcryptService().password(user);
     console.log('bcryptService().password(user); ', bcryptService().password(user));
+    user.updatedAt = new Date();
+    //Metodo save de sequelize para guardar en la BDD
+    const resultado = await user.save();
+    if (!resultado) {
+      return res.status(400).json({
+        ok: false,
+        msg: "There was an error, trying to save the user.",
+        user,
+      });
+    }
+    user = await User.findByPk(id_user, {
+      include: [
+        {
+          model: Role,
+          as: "Role",
+          required: true
+        },
+        {
+          model: Level,
+          as: "Level",
+          required: true
+        },
+      ],
+    });
+    return res.status(200).json({
+      ok: true,
+      msg: "User was updated",
+      user
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      ok: false,
+      msg: "Internal server error",
+    });
+  }
+};
+/*
+==========================================
+                  Update is_active_user field: 
+PATCH - /disable-user/:id_user Body: (x-www-form-urlencoded)
+
+is_active_user
+==========================================
+*/
+exports.updateIsActiveUser = async (req, res) => {
+  // Debugging
+  const id_user = Number(req.params.id_user);
+  // Get the data by a destructuring.
+  const { is_active_user } = req.body;
+  try {
+    let user = await User.findByPk(id_user);
+    // Update data:
+    user.is_active_user = is_active_user;
     user.updatedAt = new Date();
     //Metodo save de sequelize para guardar en la BDD
     const resultado = await user.save();

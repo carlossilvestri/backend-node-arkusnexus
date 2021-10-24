@@ -37,7 +37,10 @@ module.exports = () => {
   router.post("/user", UserController.register);
   router.get("/users", UserController.getAll);
   router.get("/user/:id_user", UserController.getUserById);
+  router.get("/users-by-name", UserController.getUsersByName);
   router.put("/user/:id_user", auth, UserController.editUserById);
+  router.put("/edit-any-user/:id_user", auth2.checkForSuperAdmin, UserController.editUserByIdSuperAdmin);
+  router.patch("/disable-user/:id_user", auth, auth2.checkForSuperAdmin, UserController.updateIsActiveUser);
   router.post("/login", UserController.login);
   /* LEVELS */
   router.post("/level", LevelController.register);
