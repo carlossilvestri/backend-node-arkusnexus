@@ -39,7 +39,7 @@ module.exports = () => {
   router.get("/user/:id_user", UserController.getUserById);
   router.get("/users-by-name", UserController.getUsersByName);
   router.put("/user/:id_user", auth, UserController.editUserById);
-  router.put("/edit-any-user/:id_user", auth2.checkForSuperAdmin, UserController.editUserByIdSuperAdmin);
+  router.put("/edit-any-user/:id_user", auth, auth2.checkForSuperAdmin, UserController.editUserByIdSuperAdmin);
   router.patch("/disable-user/:id_user", auth, auth2.checkForSuperAdmin, UserController.updateIsActiveUser);
   router.post("/login", UserController.login);
   /* LEVELS */
@@ -58,16 +58,21 @@ module.exports = () => {
   router.post("/team", TeamController.register);
   router.get("/team", TeamController.getTeams);
   router.get("/team/:id_team", TeamController.getById);
+  router.get("/team-by-name", TeamController.getByName);
   router.put("/team/:id_team", TeamController.edit);
   router.delete("/team/:id_team", TeamController.delete);
+  router.patch("/disable-team/:id_team", auth, auth2.checkForSuperAdmin, TeamController.updateIsActive);
   /* ACCOUNTS */
   router.post("/account", AccountController.register);
   router.get("/account", AccountController.getAll);
   router.get("/account/:id_account", AccountController.getById);
+  router.get("/account-by-name", AccountController.getAccountsByName);
   router.put("/account/:id_account", AccountController.editById);
+  router.patch("/disable-account/:id_account", auth, auth2.checkForSuperAdmin, AccountController.updateIsActiveAccount);
   /* TEAM_USERS */
   router.post("/team_user", Team_userController.register);
   router.put("/team_user/:id_team_user", Team_userController.editById);
+  router.patch("/disable-team_user/:id_team_user", Team_userController.updateIsActive);
   router.delete("/team_user/:id_team_user", Team_userController.delete);
   router.get("/team_user", Team_userController.getAll);
   router.get("/team_user_by_team_f/:id_team_f", Team_userController.getByTeamF);

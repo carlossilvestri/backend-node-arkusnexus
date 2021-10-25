@@ -1,7 +1,7 @@
 const { isObjAccountValid } = require("../functions/function");
 const Account = require("../models/Account");
 const Team = require("../models/Team");
-
+const { Op } = require("sequelize");
 /*
 ==========================================
 Register an account: POST - /account Body: (x-www-form-urlencoded)
@@ -96,7 +96,57 @@ exports.getAll = async (req, res) => {
     });
   }
 };
+/*
+==========================================
+Get accounts: GET - /account-by-name Params: ?desde=0&name=example_account (It will return an array of Accounts of maximum 10, using desde as a parameter) if the user did not send the desde parameter, desde will be 0 by default.
+ The most recent ones first. (Order by DESC) 
+==========================================
+*/
+exports.getAccountsByName = async (req, res) => {
+  let desde = req.query.desde || 0, account_name = req.query.account_name || '';
+  desde = Number(desde);
 
+  if (desde == 0 || desde > 0) {
+    try {
+      let accounts = await Account.findAll({
+        limit: 10,
+        offset: desde,
+        order: [["createdAt", "DESC"]],
+        where: {
+          account_name: {
+            [Op.like]: "%" + account_name + "%",
+          },
+          is_active: true
+        },
+        include: [
+          {
+            model: Team,
+            as: "Team",
+            required: true,
+          },
+        ],
+      });
+      const AccountsQuantity = accounts.length;
+      return res.status(200).json({
+        ok: true,
+        account_quantity_for_the_request: AccountsQuantity,
+        accounts,
+      });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({
+        ok: false,
+        msg: "Internal server error",
+      });
+    }
+  } else {
+    // 400 (Bad Request)
+    return res.status(400).json({
+      ok: false,
+      msg: "Bad Request. The parameter desde (int) must be a number.",
+    });
+  }
+};
 /*
 ==========================================
                   Edit an account: 
@@ -161,7 +211,62 @@ exports.editById = async (req, res) => {
     });
   }
 };
+/*
+==========================================
+                  Edit an account: 
+PUT - /account/:id_account Body: (x-www-form-urlencoded)
 
+is_active
+id_account
+id_team_f
+responsible_operations_name
+name_client
+account_name
+==========================================
+*/
+exports.updateIsActiveAccount = async (req, res) => {
+  // Debugging
+  const id_account = Number(req.params.id_account);
+  // Get the data by a destructuring.
+  const {
+    is_active
+  } = req.body;
+  try {
+    let account = await Account.findByPk(id_account);
+    // Update data:
+    account.is_active = is_active;
+    account.updatedAt = new Date();
+    //Metodo save de sequelize para guardar en la BDD
+    const resultado = await account.save();
+    if (!resultado) {
+      return res.status(400).json({
+        ok: false,
+        msg: "There was an mistake, trying to save the account.",
+        account,
+      });
+    }
+    account = await Account.findByPk(id_account, {
+        include: [
+            {
+              model: Team,
+              as: "Team",
+              required: true,
+            },
+          ],
+    });
+    return res.status(200).json({
+      ok: true,
+      msg: "account was updated",
+      account,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      ok: false,
+      msg: "Internal server error",
+    });
+  }
+};
 /*
 ==========================================
             Get a specific user by id.

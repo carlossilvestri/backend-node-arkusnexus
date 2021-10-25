@@ -17,7 +17,11 @@ const Team = sequelize.define('Team', {
   },
   name: {
     type: Sequelize.STRING,
-  }
+  },
+  is_active: {
+    type: Sequelize.BOOLEAN,
+    defaultValue: true,
+  },
 }, { tableName });
 
 

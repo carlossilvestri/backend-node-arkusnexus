@@ -282,9 +282,10 @@ exports.editUserByIdSuperAdmin = async (req, res) => {
     user.is_active_user = is_active_user;
     user.role = role;
     user.name = name;
-    user.password = password;
-    user.password = bcryptService().password(user);
-    console.log('bcryptService().password(user); ', bcryptService().password(user));
+    if(password && password != ''){
+      user.password = password;
+      user.password = bcryptService().password(user);
+    }
     user.updatedAt = new Date();
     //Metodo save de sequelize para guardar en la BDD
     const resultado = await user.save();

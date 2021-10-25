@@ -1,5 +1,5 @@
 const Team = require('../models/Team');
-
+const { Op } = require("sequelize");
 /*
 ==========================================
 Register a team: POST - /team Body: (x-www-form-urlencoded) name
@@ -40,7 +40,10 @@ exports.getTeams = async (req, res) => {
         const teams = await Team.findAll({
           limit: 10,
           offset: desde,
-          order: [["createdAt", "ASC"]]
+          order: [["createdAt", "ASC"]],
+          where: {
+            is_active: true
+          },
         });
         if (!teams) {
           // 400 (Bad Request)
@@ -70,6 +73,54 @@ exports.getTeams = async (req, res) => {
       });
     }
   };
+/* ==========================================
+Get teams by name with pagination: GET /team-by-name?desde=0
+========================================== */
+exports.getByName = async (req, res) => {
+  let desde = req.query.desde || 0, name = req.query.name || '';
+  desde = Number(desde);
+  // console.log(req);
+  if (desde == 0 || desde > 0) {
+    try {
+      const teams = await Team.findAll({
+        limit: 10,
+        offset: desde,
+        order: [["createdAt", "ASC"]],
+        where: {
+          name: {
+            [Op.like]: "%" + name + "%",
+          },
+          is_active: true
+        },
+      });
+      if (!teams) {
+        // 400 (Bad Request)
+        return res.status(400).json({
+          ok: false,
+          msg: "No teams were found.",
+        });
+      }
+      const team_quantity = teams.length;
+      return res.status(200).json({
+        ok: true,
+        desde,
+        team_quantity,
+        teams,
+      });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({
+        msg: "Internal server error",
+      });
+    }
+  } else {
+    // 400 (Bad Request)
+    return res.status(400).json({
+      ok: false,
+      msg: "The parameter is not valid.",
+    });
+  }
+};
 /*==========================================
 Get a specific teams by id: GET /team/:id_team == NO TOKEN REQUIRED ==
 ==========================================*/
@@ -158,6 +209,58 @@ exports.edit = async (req, res) => {
             msg: 'id_team is required'
         });
     }
+}
+/* ==========================================
+Update is_active team field: PATCH /disable-team/:id_team Ejm. /team/1
+is_active     (body)
+id_team (params)
+(x-www-form-urlencoded)
+========================================== */
+exports.updateIsActive = async (req, res) => {
+  /*
+  // Debugging...
+  console.log("req.params ", req.params, "req.body ", req.body);
+  */
+  // Get the data:
+  const id_team = req.params.id_team,
+      is_active = req.body.is_active;
+  if (id_team) {
+      try {
+          // Validar que no esten vacios los datos.
+              const team = await Team.findOne({
+                  where: {
+                      id_team
+                  }
+              });
+              //Cambiar el nombre del team:
+              team.is_active = is_active;
+              team.updatedAt = new Date();
+              //Metodo save de sequelize para guardar en la BDD
+              const resultado = await team.save();
+              if (!resultado) return next();
+              return res.status(200).json({
+                  ok: true,
+                  msg: 'Team was updated'
+              });
+          return res.status(400).json({
+              ok: false,
+              msg: 'Bad Request'
+          });
+
+      } catch (err) {
+          console.log(err);
+          return res.status(500).json({
+              ok: false,
+              msg: 'Internal server error'
+          });
+      }
+  } else {
+      // Accion prohibida. (Error)
+      return res.status(403).json({
+          ok: false,
+          msg: 'id_team is required'
+      });
+  }
 }
 
 /* ==========================================

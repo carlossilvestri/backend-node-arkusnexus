@@ -25,7 +25,11 @@ const Team_user = sequelize.define('Team_user', {
   },
   ending_date: {
     type: Sequelize.DATE
-  }
+  },
+  is_active: {
+    type: Sequelize.BOOLEAN,
+    defaultValue: true,
+  },
 }, { tableName });
 
 // Llaves foraneas.

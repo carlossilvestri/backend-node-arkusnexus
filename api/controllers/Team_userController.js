@@ -124,6 +124,62 @@ exports.editById = async (req, res) => {
       });
     }
   };
+  /*
+==========================================
+                  Edit an account: 
+PUT - /team_user/:id_team_user Body: (x-www-form-urlencoded)
+
+ending_date
+beggining_date
+id_user_f
+id_team_f
+==========================================
+*/
+exports.updateIsActive = async (req, res) => {
+  const id_team_user = Number(req.params.id_team_user);
+  // Get the data by a destructuring.
+  const { is_active } = req.body;
+  try {
+    let team_user = await Team_user.findByPk(id_team_user);
+    // Update data:
+    team_user.is_active = is_active;
+    team_user.updatedAt = new Date();
+    //Metodo save de sequelize para guardar en la BDD
+    const result = await team_user.save();
+    if (!result) {
+      return res.status(400).json({
+        ok: false,
+        msg: "There was an mistake when trying to save the team_user.",
+        team_user,
+      });
+    }
+    team_user = await Team_user.findByPk(id_team_user, {
+        include: [
+            {
+              model: Team,
+              as: "Team",
+              required: true,
+            },
+            {
+              model: User,
+              as: "User",
+              required: true,
+            },
+          ],
+    });
+    return res.status(200).json({
+      ok: true,
+      msg: "Team_user was updated",
+      team_user,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      ok: false,
+      msg: "Internal server error",
+    });
+  }
+};
 
   /*
 ==========================================
@@ -141,6 +197,9 @@ exports.getAll = async (req, res) => {
           limit: 10,
           offset: desde,
           order: [["createdAt", "DESC"]],
+          where: {
+            is_active: true
+          },
           include: [
             {
               model: Team,
@@ -193,7 +252,8 @@ exports.getByTeamF = async (req, res) => {
           offset: desde,
           order: [["createdAt", "DESC"]],
           where: {
-            id_team_f
+            id_team_f,
+            is_active: true
           },
           include: [
             {
@@ -246,7 +306,8 @@ exports.getByUserF = async (req, res) => {
           offset: desde,
           order: [["createdAt", "DESC"]],
           where: {
-            id_user_f
+            id_user_f,
+            is_active: true
           },
           include: [
             {
