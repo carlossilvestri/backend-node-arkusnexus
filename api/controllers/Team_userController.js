@@ -235,6 +235,114 @@ exports.getAll = async (req, res) => {
     }
   };
 
+    /*
+==========================================
+Get Team_users: GET - /team_user_by_beggining_date Params: ?desde=0&beggining_date= (It will return an array of Team_users of maximum 10, using desde as a parameter) if the user did not send the desde parameter, desde will be 0 by default.
+ The most recent ones first. (Order by DESC) 
+==========================================
+*/
+exports.getByBegginingDate = async (req, res) => {
+  let desde = req.query.desde || 0,
+  beggining_date = req.query.beggining_date || '';
+  desde = Number(desde);
+
+  if (desde == 0 || desde > 0) {
+    try {
+      let team_users = await Team_user.findAll({
+        limit: 10,
+        offset: desde,
+        order: [["createdAt", "DESC"]],
+        where: {
+          beggining_date
+        },
+        include: [
+          {
+            model: Team,
+            as: "Team",
+            required: true,
+          },
+          {
+            model: User,
+            as: "User",
+            required: true,
+          },
+        ],
+      });
+      const TeamUsersQuantity = team_users.length;
+      return res.status(200).json({
+        ok: true,
+        team_user_quantity_for_the_request: TeamUsersQuantity,
+        team_users,
+      });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({
+        ok: false,
+        msg: "Internal server error",
+      });
+    }
+  } else {
+    // 400 (Bad Request)
+    return res.status(400).json({
+      ok: false,
+      msg: "Bad Request. The parameter desde (int) must be a number.",
+    });
+  }
+};
+    /*
+==========================================
+Get Team_users: GET - /team_user_by_ending_date Params: ?desde=0&ending_date= (It will return an array of Team_users of maximum 10, using desde as a parameter) if the user did not send the desde parameter, desde will be 0 by default.
+ The most recent ones first. (Order by DESC) 
+==========================================
+*/
+exports.getByEndingDate = async (req, res) => {
+  let desde = req.query.desde || 0,
+  ending_date = req.query.ending_date || '';
+  desde = Number(desde);
+
+  if (desde == 0 || desde > 0) {
+    try {
+      let team_users = await Team_user.findAll({
+        limit: 10,
+        offset: desde,
+        order: [["createdAt", "DESC"]],
+        where: {
+          ending_date
+        },
+        include: [
+          {
+            model: Team,
+            as: "Team",
+            required: true,
+          },
+          {
+            model: User,
+            as: "User",
+            required: true,
+          },
+        ],
+      });
+      const TeamUsersQuantity = team_users.length;
+      return res.status(200).json({
+        ok: true,
+        team_user_quantity_for_the_request: TeamUsersQuantity,
+        team_users,
+      });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({
+        ok: false,
+        msg: "Internal server error",
+      });
+    }
+  } else {
+    // 400 (Bad Request)
+    return res.status(400).json({
+      ok: false,
+      msg: "Bad Request. The parameter desde (int) must be a number.",
+    });
+  }
+};
   /*
 ==========================================
             Get a specific Team_user by id.
