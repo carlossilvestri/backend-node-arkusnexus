@@ -75,6 +75,8 @@ module.exports = () => {
   router.patch("/disable-team_user/:id_team_user", Team_userController.updateIsActive);
   router.delete("/team_user/:id_team_user", Team_userController.delete);
   router.get("/team_user", Team_userController.getAll);
+  router.get("/team_user/:id_team_user", Team_userController.getById);
+  router.get("/team_user-by-user-name", Team_userController.getByUserName);
   router.get("/team_user_by_team_f/:id_team_f", Team_userController.getByTeamF);
   router.get("/team_user_by_user_f/:id_user_f", Team_userController.getByUserF);
   // 

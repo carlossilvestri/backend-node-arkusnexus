@@ -2,7 +2,7 @@ const { isObjTeamUserValid } = require('../functions/function');
 const Team_user = require('../models/Team_user');
 const Team = require('../models/Team');
 const User = require('../models/User');
-
+const { Op } = require("sequelize");
 /*
 ==========================================
 Register an team_user: POST - /team_user Body: (x-www-form-urlencoded)
@@ -235,6 +235,113 @@ exports.getAll = async (req, res) => {
     }
   };
 
+  /*
+==========================================
+            Get a specific Team_user by id.
+GET - /team_user/:id_team_user
+==========================================
+*/
+exports.getById = async (req, res) => {
+  let id_team_user = req.params.id_team_user;
+  id_team_user = Number(id_team_user);
+  if (!id_team_user || id_team_user <= 0) {
+    return res.status(400).json({
+      ok: false,
+      message: "id_team_user is not valid.",
+    });
+  }
+  // Find the Team_user
+  try {
+    let team_user = await Team_user.findByPk(id_team_user, {
+      include: [
+        {
+          model: Team,
+          as: "Team",
+          required: true,
+        },
+        {
+          model: User,
+          as: "User",
+          required: true,
+        },
+      ],
+    });
+    // If the user exists:
+    if (team_user) {
+      return res.status(200).json({
+        ok: true,
+        team_user,
+      });
+    }
+    // I does not exist:
+    return res.status(400).json({
+      ok: false,
+      message: "Could not find the team_user.",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Internal server error",
+    });
+  }
+};
+  /*
+==========================================
+    Get a specific Team_user by id.
+GET - /team_user-by-user-name/?user_name=
+==========================================
+*/
+exports.getByUserName = async (req, res) => {
+  let user_name = req.query.user_name || '';
+  if (!user_name || user_name.length <= 0) {
+    return res.status(400).json({
+      ok: false,
+      message: "user_name is not valid.",
+    });
+  }
+  // Find the Team_user
+  try {
+    let team_users = await Team_user.findAll({
+      include: [
+        {
+          model: Team,
+          as: "Team",
+          required: true,
+        },
+        {
+          model: User,
+          as: "User",
+          required: true,
+          where: {
+            name: {
+              [Op.like]: "%" + user_name + "%",
+            },
+            is_active_user: true
+          }
+        },
+      ],
+    });
+    // If the user exists:
+    if (team_users) {
+      return res.status(200).json({
+        ok: true,
+        team_users,
+      });
+    }
+    // I does not exist:
+    return res.status(400).json({
+      ok: false,
+      message: "Could not find the team_users.",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Internal server error",
+    });
+  }
+};
 /*
 ==========================================
 Get Team_users: GET - /team_user_by_team_f/:id_team_f Params: ?desde=0 (It will return an array of Team_users of maximum 10, using desde as a parameter) if the user did not send the desde parameter, desde will be 0 by default.
